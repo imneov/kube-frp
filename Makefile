@@ -3,7 +3,12 @@ export GO111MODULE=on
 LDFLAGS := -s -w
 
 # Image URL to use all building/pushing image targets
-IMG ?= frp/frp:latest
+REPO ?= tkeelio
+TAG ?= latest
+IMG_FRPC ?= ${REPO}/kube-frpc:${TAG}
+IMG_FRPS ?= ${REPO}/kube-frps:${TAG}
+
+
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:allowDangerousTypes=true"
 
@@ -88,16 +93,36 @@ generate: controller-gen
 
 # Build the docker image
 docker-build: test
-	docker build -t ${IMG} .
+	docker build -t ${IMG_FRPC} .
+	docker build -t ${IMG_FRPS} .
 
 # Push the docker image
-docker-push:
-	docker push ${IMG}
+docker-push: 
+	docker push ${IMG_FRPC}
+	docker push ${IMG_FRPS}
 
 clean:
 	rm -f ./bin/frpc
 	rm -f ./bin/frps
 	rm -rf ./lastversion
+
+build-local-frpc: ; $(info $(M)...Begin to build frp binaries.)  @ ## Build frp binaries.
+	CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -tags frps -o bin/frps ./cmd/frps
+
+build-frpc-image: ; $(info $(M)...Begin to build frp image.)  @ ## Build frp image.
+	docker build -t ${IMG_FRPC}  -f dockerfiles/Dockerfile-for-frpc .
+
+build-cross-frpc-image: ; $(info $(M)...Begin to build frp cross-platform image.)  @ ## Build frp cross-platform image.
+	docker buildx build -t ${IMG_FRPC} --push --platform linux/amd64,linux/arm64  -f dockerfiles/Dockerfile-for-frpc .
+
+build-local-frps: ; $(info $(M)...Begin to build frp binaries.)  @ ## Build frp binaries.
+	CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -tags frpc -o bin/frpc ./cmd/frpc
+
+build-frps-image: ; $(info $(M)...Begin to build frp image.)  @ ## Build frp image.
+	docker build -t ${IMG_FRPS}  -f dockerfiles/Dockerfile-for-frps .
+
+build-cross-frps-image: ; $(info $(M)...Begin to build frp cross-platform image.)  @ ## Build frp cross-platform image.
+	docker buildx build -t ${IMG_FRPS} --push --platform linux/amd64,linux/arm64  -f dockerfiles/Dockerfile-for-frps .
 
 ##@ Dependencies
 

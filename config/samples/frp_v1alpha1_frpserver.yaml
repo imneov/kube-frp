@@ -1,11 +1,9 @@
-apiVersion: frp.kubeinfra.io/v1alpha1
+apiVersion: tunnel.kubeinfra.io/v1alpha1
 kind: FRPServer
 metadata:
   name: frpserver-sample
-  namespace: default
 spec:
   version: "v1"
-  
   # Basic server configuration
   bindAddr: "0.0.0.0"
   bindPort: 17000
@@ -15,10 +13,6 @@ spec:
   allowPorts:
     - start: 2000
       end: 2000
-
-
-
-  
   # Dashboard configuration
   webServer:
     port: 7500

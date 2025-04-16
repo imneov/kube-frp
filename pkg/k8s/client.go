@@ -48,9 +48,9 @@ func NewClient(kubeconfig string) (client.Client, error) {
 }
 
 // LoadServerConfig loads the server configuration from a FRPServer CR
-func LoadServerConfig(ctx context.Context, c client.Client, name, namespace string) (*config.ServerConfig, error) {
+func LoadServerConfig(ctx context.Context, c client.Client, name string) (*config.ServerConfig, error) {
 	frpServer := &frpv1alpha1.FRPServer{}
-	err := c.Get(ctx, client.ObjectKey{Namespace: namespace, Name: name}, frpServer)
+	err := c.Get(ctx, client.ObjectKey{Name: name}, frpServer)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load FRPServer CR: %v", err)
 	}

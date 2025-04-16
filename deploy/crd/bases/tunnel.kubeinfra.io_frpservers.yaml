@@ -4,15 +4,15 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: frpservers.frp.kubeinfra.io
+  name: frpservers.tunnel.kubeinfra.io
 spec:
-  group: frp.kubeinfra.io
+  group: tunnel.kubeinfra.io
   names:
     kind: FRPServer
     listKind: FRPServerList
     plural: frpservers
     singular: frpserver
-  scope: Namespaced
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - jsonPath: .status.ready

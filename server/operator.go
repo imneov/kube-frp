@@ -113,8 +113,29 @@ func (svr *Service) updateProxyStats(ctx context.Context) {
 						IntervalSeconds: int32(cfg.HealthCheck.IntervalSeconds),
 					}
 
-				// case *configv1.UDPProxyConfig:
-				// 	proxyInfo.ProxyType = "udp"
+				case *configv1.UDPProxyConfig:
+					//{"name":"your_name_here","type":"tcp","transport":{"bandwidthLimit":"","bandwidthLimitMode":"client"},"loadBalancer":{"group":""},"healthCheck":{"type":"","intervalSeconds":0},"localIP":"127.0.0.1","plugin":null,"remotePort":1711}
+					proxyInfo.ProxyConfig = v1alpha1.ProxyConfig{
+						Name:       cfg.Name,
+						Type:       cfg.Type,
+						LocalIP:    cfg.LocalIP,
+						RemotePort: int32(cfg.RemotePort),
+					}
+
+					proxyInfo.ProxyConfig.Transport = &v1alpha1.TransportConfig{
+						BandwidthLimit:     cfg.Transport.BandwidthLimit.String(),
+						BandwidthLimitMode: cfg.Transport.BandwidthLimitMode,
+					}
+
+					proxyInfo.ProxyConfig.LoadBalancer = &v1alpha1.LoadBalancerConfig{
+						Group: cfg.LoadBalancer.Group,
+					}
+
+					proxyInfo.ProxyConfig.HealthCheck = &v1alpha1.HealthCheckConfig{
+						Type:            cfg.HealthCheck.Type,
+						IntervalSeconds: int32(cfg.HealthCheck.IntervalSeconds),
+					}
+					proxyInfo.ProxyType = "udp"
 				// case *configv1.STCPProxyConfig:
 				// 	proxyInfo.ProxyType = "stcp"
 				// case *configv1.SUDPProxyConfig:
@@ -159,7 +180,14 @@ func parseTime(timeStr string) time.Time {
 	if timeStr == "" {
 		return time.Time{}
 	}
+	// First try RFC3339 format
 	startTime, err := time.Parse(time.RFC3339, timeStr)
+	if err == nil {
+		return startTime
+	}
+
+	// If that fails, try the custom format "MM-DD HH:MM:SS"
+	startTime, err = time.Parse("01-02 15:04:05", timeStr)
 	if err != nil {
 		log.Warnf("parse proxy [%s] start time error: %v", timeStr, err)
 		return time.Time{}

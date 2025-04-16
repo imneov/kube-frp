@@ -15,8 +15,8 @@ var (
 )
 
 // Init initializes the frp server client
-func Init(client client.Client, serverName, namespace string) error {
-	manager, err := NewManager(client, serverName, namespace)
+func Init(client client.Client, serverName string) error {
+	manager, err := NewManager(client, serverName)
 	if err != nil {
 		klog.Errorf("failed to create frp server client: %v", err)
 		return err

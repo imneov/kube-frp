@@ -61,7 +61,7 @@ var rootCmd = &cobra.Command{
 		)
 
 		if frpServerName != "" {
-			svrCfg, err = InitManagerAndLoadConfig(frpServerName, frpServerNamespace, kubeconfig)
+			svrCfg, err = InitManagerAndLoadConfig(frpServerName, kubeconfig)
 			if err != nil {
 				return err
 			}
@@ -108,7 +108,7 @@ func runServer(cfg *v1.ServerConfig) (err error) {
 	if cfgFile != "" {
 		log.Infof("frps uses config file: %s", cfgFile)
 	} else if frpServerName != "" {
-		log.Infof("frps uses FRPServer CR: %s/%s", frpServerNamespace, frpServerName)
+		log.Infof("frps uses FRPServer CR as config: %s", frpServerName)
 	} else {
 		log.Infof("frps uses command line arguments for config")
 	}

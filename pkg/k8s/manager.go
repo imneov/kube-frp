@@ -7,6 +7,7 @@ import (
 
 	v1alpha1 "github.com/fatedier/frp/api/v1alpha1"
 	config "github.com/fatedier/frp/pkg/config/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -20,15 +21,14 @@ type Manager struct {
 }
 
 // NewManager creates a new Kubernetes manager
-func NewManager(client client.Client, serverName, namespace string) (*Manager, error) {
-	frpServer, err := LoadServerConfig(context.Background(), client, serverName, namespace)
+func NewManager(client client.Client, serverName string) (*Manager, error) {
+	frpServer, err := LoadServerConfig(context.Background(), client, serverName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load server config: %v", err)
 	}
 	manager := &Manager{
 		client:     client,
 		serverName: serverName,
-		namespace:  namespace,
 		server:     frpServer,
 	}
 	return manager, nil
@@ -117,8 +117,17 @@ func (m *Manager) UpdateProxyStats(ctx context.Context, connectionStatus []*v1al
 
 	// Find and remove the connection
 	server.Status.ActiveConnections = connectionStatus
+	server.Status.Conditions = []metav1.Condition{
+		{
+			Type:               "Ready",
+			Status:             metav1.ConditionTrue,
+			Reason:             "Running",
+			Message:            "frp server is running",
+			LastTransitionTime: metav1.Now(),
+			ObservedGeneration: server.Generation,
+		},
+	}
 
 	// Update the status in Kubernetes
 	return m.client.Status().Update(ctx, server)
-
 }

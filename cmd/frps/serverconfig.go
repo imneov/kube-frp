@@ -22,22 +22,24 @@ import (
 
 	v1 "github.com/fatedier/frp/pkg/config/v1"
 	"github.com/fatedier/frp/pkg/k8s"
+	"github.com/spf13/pflag"
 )
 
 var (
-	frpServerName      string
-	frpServerNamespace string
-	kubeconfig         string
+	frpServerName string
+	kubeconfig    string
+	k8sFlags      = pflag.NewFlagSet("Kubernetes", pflag.ExitOnError)
 )
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&frpServerName, "frp-server-name", "", "Name of the FRPServer CR")
-	rootCmd.PersistentFlags().StringVar(&frpServerNamespace, "frp-server-namespace", "default", "Namespace of the FRPServer CR")
-	rootCmd.PersistentFlags().StringVar(&kubeconfig, "kubeconfig", "", "Path to the kubeconfig file")
+	k8sFlags.StringVar(&frpServerName, "kube-frps-config", "", "[Kubernetes] name of the FRPServer CR to load config from")
+	k8sFlags.StringVar(&kubeconfig, "kubeconfig", "", "[Kubernetes] path to the kubeconfig file (defaults to standard locations if not specified)")
+
+	rootCmd.PersistentFlags().AddFlagSet(k8sFlags)
 }
 
 // InitManagerAndLoadConfig loads configuration from FRPServer CR
-func InitManagerAndLoadConfig(frpServerName string, frpServerNamespace string, kubeconfig string) (*v1.ServerConfig, error) {
+func InitManagerAndLoadConfig(frpServerName string, kubeconfig string) (*v1.ServerConfig, error) {
 	if kubeconfig == "" {
 		kubeconfig = os.Getenv("KUBECONFIG")
 		if kubeconfig == "" {
@@ -54,7 +56,7 @@ func InitManagerAndLoadConfig(frpServerName string, frpServerNamespace string, k
 		return nil, fmt.Errorf("failed to create Kubernetes client: %v", err)
 	}
 
-	err = k8s.Init(client, frpServerName, frpServerNamespace)
+	err = k8s.Init(client, frpServerName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize frp server client: %v", err)
 	}

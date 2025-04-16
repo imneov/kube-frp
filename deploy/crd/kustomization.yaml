@@ -2,7 +2,7 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/frp.kubeinfra.io_frpservers.yaml
+- bases/tunnel.kubeinfra.io_frpservers.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patches:
