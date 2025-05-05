@@ -27,6 +27,9 @@ import (
 	"github.com/imneov/kube-frp/pkg/util/log"
 	"github.com/imneov/kube-frp/pkg/util/version"
 	"github.com/imneov/kube-frp/server"
+
+	ctrl "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var (
@@ -104,6 +107,9 @@ func Execute() {
 
 func runServer(cfg *v1.ServerConfig) (err error) {
 	log.InitLogger(cfg.Log.To, cfg.Log.Level, int(cfg.Log.MaxDays), cfg.Log.DisablePrintColor)
+
+	// set controller-runtime global logger to enable client-go warnings
+	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
 	if cfgFile != "" {
 		log.Infof("frps uses config file: %s", cfgFile)
