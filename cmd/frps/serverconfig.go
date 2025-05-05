@@ -17,6 +17,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"net"
 	"os"
 	"path/filepath"
 
@@ -26,14 +28,16 @@ import (
 )
 
 var (
+	internetAddr  string
 	frpServerName string
 	kubeconfig    string
 	k8sFlags      = pflag.NewFlagSet("Kubernetes", pflag.ExitOnError)
 )
 
 func init() {
-	k8sFlags.StringVar(&frpServerName, "kube-frps-config", "", "[Kubernetes] name of the FRPServer CR to load config from")
-	k8sFlags.StringVar(&kubeconfig, "kubeconfig", "", "[Kubernetes] path to the kubeconfig file (defaults to standard locations if not specified)")
+	k8sFlags.StringVar(&internetAddr, "frps-internet-host", "", "[Kubernetes] Public IP or DNS name used by clients to connect to frps")
+	k8sFlags.StringVar(&frpServerName, "frp-server-cr", "", "[Kubernetes] Name of the FRPServer CustomResource (CR) to load configuration")
+	k8sFlags.StringVar(&kubeconfig, "kubeconfig", "", "[Kubernetes] Absolute path to the kubeconfig file (if running out-of-cluster)")
 
 	rootCmd.PersistentFlags().AddFlagSet(k8sFlags)
 }
@@ -49,6 +53,10 @@ func InitManagerAndLoadConfig(frpServerName string, kubeconfig string) (*v1.Serv
 			}
 			kubeconfig = filepath.Join(home, ".kube", "config")
 		}
+	}
+
+	if internetAddr == "" {
+		internetAddr = getOutboundIP().String()
 	}
 
 	client, err := k8s.NewClient(kubeconfig)
@@ -70,5 +78,19 @@ func InitManagerAndLoadConfig(frpServerName string, kubeconfig string) (*v1.Serv
 		svrCfg.Complete()
 	}
 
+	svrCfg.InternetAddr = internetAddr
+
 	return svrCfg, nil
+}
+
+func getOutboundIP() net.IP {
+	// 连接到一个“理论上的”公网地址（Google DNS），不会真正建立连接
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatalf("Failed to determine outbound IP: %v", err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	return localAddr.IP
 }

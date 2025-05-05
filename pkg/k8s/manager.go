@@ -116,6 +116,7 @@ func (m *Manager) UpdateProxyStats(ctx context.Context, connectionStatus []*v1al
 	}
 
 	// Find and remove the connection
+	server.Status.InternetAddr = m.server.InternetAddr
 	server.Status.ActiveConnections = connectionStatus
 	server.Status.Conditions = []metav1.Condition{
 		{

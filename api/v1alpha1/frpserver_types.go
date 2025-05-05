@@ -192,6 +192,10 @@ type FRPServerStatus struct {
 	// +optional
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 
+	// InternetAddr Public IP or DNS name used by clients to connect to frps
+	// +optional
+	InternetAddr string `json:"internetAddr,omitempty"`
+
 	// ServiceStatus contains the overall status of the FRP service
 	// +optional
 	ServiceStatus ServiceStatus `json:"serviceStatus,omitempty"`

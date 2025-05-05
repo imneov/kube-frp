@@ -24,6 +24,9 @@ import (
 type ServerConfig struct {
 	APIMetadata
 
+	// InternetAddr Public IP or DNS name used by clients to connect to frps
+	InternetAddr string
+
 	// EnableOperator specifies whether to enable the operator for k8s.
 	EnableOperator bool `json:"enableOperator,omitempty"`
 

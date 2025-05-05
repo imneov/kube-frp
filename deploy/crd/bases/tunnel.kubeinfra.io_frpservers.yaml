@@ -669,6 +669,10 @@ spec:
                   - type
                   type: object
                 type: array
+              internetAddr:
+                description: InternetAddr Public IP or DNS name used by clients to
+                  connect to frps
+                type: string
               observedGeneration:
                 description: ObservedGeneration is the most recent generation observed
                   by the controller
