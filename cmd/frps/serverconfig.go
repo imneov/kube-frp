@@ -19,8 +19,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
-	"path/filepath"
 
 	v1 "github.com/imneov/kube-frp/pkg/config/v1"
 	"github.com/imneov/kube-frp/pkg/k8s"
@@ -44,16 +42,6 @@ func init() {
 
 // InitManagerAndLoadConfig loads configuration from FRPServer CR
 func InitManagerAndLoadConfig(frpServerName string, kubeconfig string) (*v1.ServerConfig, error) {
-	if kubeconfig == "" {
-		kubeconfig = os.Getenv("KUBECONFIG")
-		if kubeconfig == "" {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				return nil, fmt.Errorf("failed to get user home directory: %v", err)
-			}
-			kubeconfig = filepath.Join(home, ".kube", "config")
-		}
-	}
 
 	if internetAddr == "" {
 		internetAddr = getOutboundIP().String()
