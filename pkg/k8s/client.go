@@ -59,6 +59,7 @@ func LoadServerConfig(ctx context.Context, c client.Client, name string) (*confi
 	conf := &config.ServerConfig{
 		Auth: config.AuthServerConfig{
 			Method: config.AuthMethod(frpServer.Spec.Auth.Method),
+			Token:  frpServer.Spec.Auth.Token,
 		},
 		BindAddr:              frpServer.Spec.BindAddr,
 		BindPort:              frpServer.Spec.BindPort,
