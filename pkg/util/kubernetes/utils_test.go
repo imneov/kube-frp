@@ -40,7 +40,6 @@ func TestGenerateServiceName(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GenerateServiceName(tt.info)
 			if (err != nil) != tt.wantErr {
@@ -65,16 +64,23 @@ func TestParseServiceName(t *testing.T) {
 		{
 			name: "with type and ip and metadata",
 			uri:  "tcp://svc.ns.cluster:7000/pod/10.0.0.1?a=1&b=2",
-			want: &ServiceInfo{Protocol: "tcp", Name: "svc", Namespace: "ns", Cluster: "cluster", Port: 7000, Type: "pod", IP: "10.0.0.1", Metadata: map[string]string{"a": "1", "b": "2"}},
+			want: &ServiceInfo{
+				Protocol: "tcp", Name: "svc", Namespace: "ns",
+				Cluster: "cluster", Port: 7000, Type: "pod", IP: "10.0.0.1",
+				Metadata: map[string]string{"a": "1", "b": "2"},
+			},
 		},
 		{
 			name: "with type and ip and metadata",
 			uri:  "udp://svc.ns.cluster:7000/pod/10.0.0.1?a=1&b=2",
-			want: &ServiceInfo{Protocol: "udp", Name: "svc", Namespace: "ns", Cluster: "cluster", Port: 7000, Type: "pod", IP: "10.0.0.1", Metadata: map[string]string{"a": "1", "b": "2"}},
+			want: &ServiceInfo{
+				Protocol: "udp", Name: "svc", Namespace: "ns",
+				Cluster: "cluster", Port: 7000, Type: "pod", IP: "10.0.0.1",
+				Metadata: map[string]string{"a": "1", "b": "2"},
+			},
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := ParseServiceName(tt.uri)
 			if (err != nil) != tt.wantErr {
